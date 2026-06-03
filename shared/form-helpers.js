@@ -83,32 +83,24 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-// --- League money (derived from config/league.js + players.js) -------------
-// Count comes from the roster if names are listed, else LEAGUE.playerCount.
-function leagueMoney() {
+// --- League terms (from config/league.js) ----------------------------------
+// Entry fee, split percentages, and minimum players — shown on the landing page.
+// No pot amount (it depends on how many register); we show the rules instead.
+function leagueInfo() {
   const L = window.LEAGUE || {};
-  const roster = (window.PLAYERS || []).filter(Boolean);
-  let n = roster.length || L.playerCount || 6;
-  // Preview aid: ?players=N (or ?n=N) overrides the count so you can eyeball any
-  // pot/prize live without editing config. Display-only; resets on a normal visit.
-  try {
-    const o = parseInt(new URLSearchParams(location.search).get("players") || new URLSearchParams(location.search).get("n"), 10);
-    if (Number.isInteger(o) && o > 0 && o <= 50) n = o;
-  } catch (e) { /* no URL context */ }
-  const fee = L.entryFee != null ? L.entryFee : 500;
-  const winnerPct = (L.split && L.split.winner != null) ? L.split.winner : 0.65;
-  const pot = fee * n;
-  const winner = Math.round(pot * winnerPct);
-  const runnerUp = pot - winner; // exact remainder, always sums to the pot
   const cur = L.currency || "₹";
-  const fmt = (x) => cur + Number(x).toLocaleString("en-IN");
-  return { n, fee, pot, winner, runnerUp, currency: cur, fmt };
-}
-
-// Spell small counts; fall back to the digit for anything outside the map.
-function countWord(n) {
-  const words = ["zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
-  return words[n] || String(n);
+  const fee = L.entryFee != null ? L.entryFee : 500;
+  const wp = (L.split && L.split.winner != null) ? L.split.winner : 0.65;
+  const rp = (L.split && L.split.runnerUp != null) ? L.split.runnerUp : 1 - wp;
+  const pct = (x) => Math.round(x * 100) + "%";
+  return {
+    currency: cur,
+    fee,
+    feeLabel: cur + Number(fee).toLocaleString("en-IN"),
+    winnerPct: pct(wp),
+    runnerPct: pct(rp),
+    minPlayers: L.minPlayers != null ? L.minPlayers : 5,
+  };
 }
 
 // Build a "you picked" summary table from [label, value] pairs.
@@ -135,4 +127,4 @@ function showClosed({ round, name, status, blurb }) {
     </div>`;
 }
 
-window.WC = { getPlayerName, requirePlayer, $, fillSelect, setError, focusInvalid, clearBad, showSuccess, showClosed, summaryTable, escapeHtml, leagueMoney, countWord };
+window.WC = { getPlayerName, requirePlayer, $, fillSelect, setError, focusInvalid, clearBad, showSuccess, showClosed, summaryTable, escapeHtml, leagueInfo };

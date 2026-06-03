@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>World Cup 2026 — Prediction League</title>
   <meta name="theme-color" content="#03251c" />
-  <meta name="description" content="Place your World Cup 2026 prediction-league bets. Pick with your gut." />
+  <meta name="description" content="₹500 to enter. Winner takes 65% of the pot, runner-up 35%. Minimum 5 players. World Cup 2026 prediction league — register today." />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏆</text></svg>' />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,12 +20,12 @@
       <p class="eyebrow">🏆 Prediction League</p>
       <h1 class="h1">World Cup<br />2026</h1>
       <p class="lede" style="margin-top:12px">
-        <span id="m-count">Six</span> of us. <span class="gold" id="m-fee">₹500</span> each. One <span class="gold" id="m-pot">₹3,000</span> pot.<br />
-        Pick with your gut — defend it in the group chat.
+        <span class="gold" id="t-fee">₹500</span> to enter. Winner takes <span class="gold" id="t-winner">65%</span> of the pot, runner-up <span class="gold" id="t-runner">35%</span>.<br />
+        Minimum <span id="t-min">5</span> players to start — register today.
       </p>
       <div class="chips" style="justify-content:center;margin-top:16px">
-        <span class="chip">🥇 Winner <span id="m-winner">₹1,950</span></span>
-        <span class="chip">🥈 Runner-up <span id="m-runner">₹1,050</span></span>
+        <span class="chip">🥇 Winner · <span id="c-winner">65%</span></span>
+        <span class="chip">🥈 Runner-up · <span id="c-runner">35%</span></span>
       </div>
     </header>
 
@@ -127,14 +127,15 @@
   <script src="shared/form-helpers.js"></script>
   <script>
     (function () {
-      // Pot + prizes derive from config/league.js (count = roster length or playerCount).
-      const M = WC.leagueMoney();
+      // Entry fee, split %, and min players come from config/league.js.
+      const T = WC.leagueInfo();
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      set("m-count", WC.countWord(M.n));
-      set("m-fee", M.fmt(M.fee));
-      set("m-pot", M.fmt(M.pot));
-      set("m-winner", M.fmt(M.winner));
-      set("m-runner", M.fmt(M.runnerUp));
+      set("t-fee", T.feeLabel);
+      set("t-winner", T.winnerPct);
+      set("t-runner", T.runnerPct);
+      set("t-min", T.minPlayers);
+      set("c-winner", T.winnerPct);
+      set("c-runner", T.runnerPct);
       const nameInput = document.getElementById("name");
       const nameField = document.getElementById("name-field");
       const errEl = document.getElementById("name-err");
