@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Round 2 · The Comeback — WC2026</title>
+  <meta name="theme-color" content="#03251c" />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🟢</text></svg>' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom:6px">
+      <a class="link" href="index.html" style="font-size:14px">← League</a>
+      <p class="eyebrow" style="margin-top:14px">Round 2 · The knockout reset</p>
+      <h1 class="h1" style="font-size:30px">The Comeback 🟢</h1>
+      <p class="lede" id="greeting" style="margin-top:8px"></p>
+    </header>
+
+    <form id="form" class="card" novalidate>
+      <div class="field">
+        <label>Pick your <span class="gold">4 semi-finalists</span>
+          <span class="qhint">— <span id="count" class="counter">0</span>/4 chosen · 6 pts each, +5 if they reach the final</span>
+        </label>
+        <div class="checkgrid" id="semis"></div>
+        <div class="err" data-err-for="semis"></div>
+      </div>
+
+      <div class="field">
+        <label for="boot_swap">⚽ Swap your Golden Boot pick? <span class="qhint">(optional)</span></label>
+        <select id="boot_swap" class="input"></select>
+        <div id="boot-other-wrap" style="margin-top:8px;display:none">
+          <input id="boot_swap_other" class="input" type="text" placeholder="Type the player's name" />
+        </div>
+        <div class="err" data-err-for="boot_swap"></div>
+      </div>
+
+      <div class="field">
+        <label>🃏 Joker — double one semi-finalist pick <span class="qhint">(hits = doubled, misses = no penalty)</span></label>
+        <div class="jokerwrap" id="joker"></div>
+        <div class="err" data-err-for="joker"></div>
+      </div>
+
+      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Lock in my Comeback 🔒</button>
+      <div class="err" id="form-err" style="text-align:center;margin-top:10px"></div>
+      <p class="muted" style="font-size:12px;text-align:center;margin-top:10px">Your Round 1 champion stays locked — these are fresh knockout points.</p>
+    </form>
+
+    <p class="foot">Round 2 of 3 · The Comeback</p>
+  </div>
+
+  <script src="config/teams.js"></script>
+  <script src="config/candidates.js"></script>
+  <script src="config/survivors.js"></script>
+  <script src="config/forms.js"></script>
+  <script src="config/endpoint.js"></script>
+  <script src="shared/submit.js"></script>
+  <script src="shared/form-helpers.js"></script>
+  <script>
+    (function () {
+      const meta = window.FORM_STATE.comeback;
+      const survivors = (window.SURVIVORS || []).filter(Boolean);
+
+      // Gate: closed until the admin fills the 32 surviving teams.
+      if (!meta.open || survivors.length === 0) {
+        WC.showClosed({ round: meta.round, name: meta.name, status: meta.status, blurb: meta.blurb });
+        return;
+      }
+
+      const player = WC.requirePlayer();
+      if (!player) return;
+      document.getElementById("greeting").innerHTML =
+        `Hey <strong>${WC.escapeHtml(player)}</strong> — 32 teams left. Time to climb.`;
+
+      // Semi-finalist checkboxes (exactly 4)
+      const semisWrap = document.getElementById("semis");
+      const countEl = document.getElementById("count");
+      const MAX = 4;
+      survivors.forEach((team, i) => {
+        const lab = document.createElement("label");
+        lab.className = "checkitem";
+        lab.innerHTML = `<input type="checkbox" value="${WC.escapeHtml(team)}" data-semi> <span>${WC.escapeHtml(team)}</span>`;
+        semisWrap.appendChild(lab);
+      });
+
+      const checks = () => Array.from(semisWrap.querySelectorAll("input[data-semi]"));
+      const chosen = () => checks().filter((c) => c.checked).map((c) => c.value);
+
+      function refresh() {
+        const n = chosen().length;
+        countEl.textContent = n;
+        checks().forEach((c) => {
+          c.parentElement.classList.toggle("on", c.checked);
+          // Lock unchecked boxes once 4 are picked.
+          const lock = !c.checked && n >= MAX;
+          c.disabled = lock;
+          c.parentElement.classList.toggle("locked", lock);
+        });
+        rebuildJoker();
+        WC.setError(document.querySelector('[data-err-for="semis"]'), "");
+      }
+      semisWrap.addEventListener("change", refresh);
+
+      // Boot swap
+      const swap = document.getElementById("boot_swap");
+      WC.fillSelect(swap, ["Keep my Round 1 pick", ...window.STRIKERS, "Other (type a name)"], "Keep my Round 1 pick");
+      swap.value = "Keep my Round 1 pick";
+      const swapWrap = document.getElementById("boot-other-wrap");
+      swap.addEventListener("change", () => {
+        swapWrap.style.display = swap.value === "Other (type a name)" ? "block" : "none";
+      });
+
+      // Joker rebuilds from the 4 chosen teams (plus "None")
+      const jokerWrap = document.getElementById("joker");
+      function rebuildJoker() {
+        const picks = chosen();
+        const prev = (jokerWrap.querySelector('input[name="joker"]:checked') || {}).value;
+        jokerWrap.innerHTML = "";
+        const opts = [...picks, "None"];
+        opts.forEach((label, i) => {
+          const lab = document.createElement("label");
+          lab.className = "joker";
+          const checked = label === prev ? "checked" : "";
+          lab.innerHTML = `<input type="radio" name="joker" value="${WC.escapeHtml(label)}" ${checked}>${WC.escapeHtml(label)}`;
+          if (checked) lab.classList.add("on");
+          jokerWrap.appendChild(lab);
+        });
+      }
+      jokerWrap.addEventListener("change", () => {
+        jokerWrap.querySelectorAll(".joker").forEach((l) => l.classList.toggle("on", l.querySelector("input").checked));
+        WC.setError(document.querySelector('[data-err-for="joker"]'), "");
+      });
+      rebuildJoker();
+
+      // --- Submit ----------------------------------------------------------
+      const form = document.getElementById("form");
+      const submitBtn = document.getElementById("submit");
+      const formErr = document.getElementById("form-err");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        WC.clearBad(form);
+        WC.setError(formErr, "");
+        document.querySelectorAll(".err[data-err-for]").forEach((n) => (n.textContent = ""));
+
+        const semis = chosen();
+        const swapVal = swap.value;
+        const swapOther = document.getElementById("boot_swap_other").value.trim();
+        const jokerEl = form.querySelector('input[name="joker"]:checked');
+        const joker = jokerEl ? jokerEl.value : "";
+
+        const problems = [];
+        if (semis.length !== 4) problems.push(["semis", `Pick exactly 4 semi-finalists (you have ${semis.length}).`]);
+        if (swapVal === "Other (type a name)" && !swapOther) problems.push(["boot_swap", "Type the player's name."]);
+        if (!joker) problems.push(["joker", "Pick a Joker team, or choose None."]);
+
+        if (problems.length) {
+          problems.forEach(([id, msg]) => WC.setError(document.querySelector(`[data-err-for="${id}"]`), msg));
+          WC.setError(formErr, "A few picks need a look 👆");
+          const firstEl = document.querySelector(`[data-err-for="${problems[0][0]}"]`);
+          firstEl && firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+
+        const payload = {
+          form: "comeback",
+          player,
+          f2_semis: semis.join(", "),
+          f2_boot_swap: swapVal === "Other (type a name)" ? "Other" : swapVal,
+          f2_boot_swap_other: swapVal === "Other (type a name)" ? swapOther : "",
+          f2_joker: joker,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Locking in…";
+        const res = await window.submitPicks(payload);
+        if (!res.ok) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Lock in my Comeback 🔒";
+          WC.setError(formErr, "Couldn't reach the server — your picks are saved on this device. Try again on a better connection.");
+          return;
+        }
+
+        WC.showSuccess({
+          player,
+          round: "Round 2 · The Comeback",
+          mode: res.mode,
+          summaryHtml: WC.summaryTable([
+            ["Semi-finalists", semis.join(", ")],
+            ["Golden Boot", swapVal === "Keep my Round 1 pick" ? "Kept Round 1 pick" : (swapVal === "Other (type a name)" ? swapOther : swapVal)],
+            ["🃏 Joker", joker],
+          ]),
+        });
+      });
+
+      refresh();
+    })();
+  </script>
+</body>
+</html>

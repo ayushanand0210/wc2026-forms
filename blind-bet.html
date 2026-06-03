@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Round 1 · The Blind Bet — WC2026</title>
+  <meta name="theme-color" content="#03251c" />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔵</text></svg>' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom:6px">
+      <a class="link" href="index.html" style="font-size:14px">← League</a>
+      <p class="eyebrow" style="margin-top:14px">Round 1 · Closes June 10</p>
+      <h1 class="h1" style="font-size:30px">The Blind Bet 🔵</h1>
+      <p class="lede" id="greeting" style="margin-top:8px"></p>
+    </header>
+
+    <form id="form" class="card" novalidate>
+
+      <div class="field">
+        <label for="champion">🏆 Champion</label>
+        <select id="champion" class="input" data-q></select>
+        <div class="err" data-err-for="champion"></div>
+      </div>
+
+      <div class="field">
+        <label for="runnerup">🥈 Runner-up</label>
+        <select id="runnerup" class="input" data-q></select>
+        <div class="err" data-err-for="runnerup"></div>
+      </div>
+
+      <div class="field">
+        <label for="third">🥉 Third place</label>
+        <select id="third" class="input" data-q></select>
+        <div class="err" data-err-for="third"></div>
+      </div>
+
+      <div class="field">
+        <label for="boot">⚽ Golden Boot <span class="qhint">(top scorer)</span></label>
+        <select id="boot" class="input" data-q></select>
+        <div id="boot-other-wrap" style="margin-top:8px;display:none">
+          <input id="boot_other" class="input" type="text" placeholder="Type the player's name" />
+        </div>
+        <div class="err" data-err-for="boot"></div>
+      </div>
+
+      <div class="field">
+        <label for="glove">🧤 Golden Glove <span class="qhint">(best keeper)</span></label>
+        <select id="glove" class="input" data-q></select>
+        <div id="glove-other-wrap" style="margin-top:8px;display:none">
+          <input id="glove_other" class="input" type="text" placeholder="Type the keeper's name" />
+        </div>
+        <div class="err" data-err-for="glove"></div>
+      </div>
+
+      <div class="field">
+        <label for="darkhorse">🐴 Dark Horse <span class="qhint">(non-favourite who reaches the QF)</span></label>
+        <select id="darkhorse" class="input" data-q></select>
+        <div class="err" data-err-for="darkhorse"></div>
+      </div>
+
+      <div class="field">
+        <label for="firstout">💥 First favourite to crash out <span class="qhint">(from the Favourites-8)</span></label>
+        <select id="firstout" class="input" data-q></select>
+        <div class="err" data-err-for="firstout"></div>
+      </div>
+
+      <div class="field">
+        <label for="totalgoals">🔢 Total goals in the tournament <span class="qhint">(tiebreaker)</span></label>
+        <input id="totalgoals" class="input" type="number" inputmode="numeric" min="0" max="400" step="1" placeholder="e.g. 170" />
+        <div class="err" data-err-for="totalgoals"></div>
+      </div>
+
+      <div class="field">
+        <label>🃏 Joker — double down on one pick <span class="qhint">(hits = doubled, misses = no penalty)</span></label>
+        <div class="jokerwrap" id="joker"></div>
+        <div class="err" data-err-for="joker"></div>
+      </div>
+
+      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Lock in my bets 🔒</button>
+      <div class="err" id="form-err" style="text-align:center;margin-top:10px"></div>
+      <p class="muted" style="font-size:12px;text-align:center;margin-top:10px">You can re-submit before June 10 — the latest entry counts.</p>
+    </form>
+
+    <p class="foot">Round 1 of 3 · The Blind Bet</p>
+  </div>
+
+  <script src="config/teams.js"></script>
+  <script src="config/candidates.js"></script>
+  <script src="config/forms.js"></script>
+  <script src="config/endpoint.js"></script>
+  <script src="shared/submit.js"></script>
+  <script src="shared/form-helpers.js"></script>
+  <script>
+    (function () {
+      const player = WC.requirePlayer();
+      if (!player) return;
+      document.getElementById("greeting").innerHTML =
+        `Hey <strong>${WC.escapeHtml(player)}</strong> — gut calls only. No data, just instinct.`;
+
+      const TEAMS = window.TEAMS, FAVS = window.FAVOURITES8, NONFAV = window.NON_FAVOURITES;
+
+      // Podium dropdowns
+      WC.fillSelect(document.getElementById("champion"), TEAMS, "Pick the winner…");
+      WC.fillSelect(document.getElementById("runnerup"), TEAMS, "Pick the runner-up…");
+      WC.fillSelect(document.getElementById("third"), TEAMS, "Pick third place…");
+
+      // Boot / Glove with "Other"
+      WC.fillSelect(document.getElementById("boot"), [...window.STRIKERS, "Other (type a name)"], "Pick the top scorer…");
+      WC.fillSelect(document.getElementById("glove"), [...window.KEEPERS, "Other (type a name)"], "Pick the best keeper…");
+
+      // Dark Horse = 40 non-favourites; First Out = the 8 favourites
+      WC.fillSelect(document.getElementById("darkhorse"), NONFAV, "Pick a non-favourite…");
+      WC.fillSelect(document.getElementById("firstout"), FAVS, "Pick a favourite…");
+
+      // Joker pills
+      const JOKER_OPTS = ["Champion", "Runner-up", "Third", "Golden Boot", "Golden Glove", "Dark Horse", "First Out"];
+      const jokerWrap = document.getElementById("joker");
+      JOKER_OPTS.forEach((label, i) => {
+        const id = "joker_" + i;
+        const lab = document.createElement("label");
+        lab.className = "joker";
+        lab.innerHTML = `<input type="radio" name="joker" value="${WC.escapeHtml(label)}" id="${id}">${WC.escapeHtml(label)}`;
+        jokerWrap.appendChild(lab);
+      });
+      jokerWrap.addEventListener("change", () => {
+        jokerWrap.querySelectorAll(".joker").forEach((l) => l.classList.toggle("on", l.querySelector("input").checked));
+        WC.setError(document.querySelector('[data-err-for="joker"]'), "");
+      });
+
+      // Reveal "Other" text fields
+      function wireOther(selectId, wrapId) {
+        const sel = document.getElementById(selectId);
+        const wrap = document.getElementById(wrapId);
+        sel.addEventListener("change", () => {
+          wrap.style.display = sel.value === "Other (type a name)" ? "block" : "none";
+        });
+      }
+      wireOther("boot", "boot-other-wrap");
+      wireOther("glove", "glove-other-wrap");
+
+      // Clear field error on change
+      document.querySelectorAll("[data-q], #totalgoals, #boot_other, #glove_other").forEach((el) => {
+        el.addEventListener("input", () => { el.classList.remove("bad"); });
+        el.addEventListener("change", () => { el.classList.remove("bad"); });
+      });
+
+      // --- Submit / validate -------------------------------------------------
+      const form = document.getElementById("form");
+      const submitBtn = document.getElementById("submit");
+      const formErr = document.getElementById("form-err");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        WC.clearBad(form);
+        WC.setError(formErr, "");
+        document.querySelectorAll(".err[data-err-for]").forEach((n) => (n.textContent = ""));
+
+        const v = (id) => document.getElementById(id).value;
+        const champion = v("champion"), runnerup = v("runnerup"), third = v("third");
+        const boot = v("boot"), glove = v("glove");
+        const bootOther = v("boot_other").trim(), gloveOther = v("glove_other").trim();
+        const darkhorse = v("darkhorse"), firstout = v("firstout");
+        const totalRaw = v("totalgoals").trim();
+        const jokerEl = form.querySelector('input[name="joker"]:checked');
+        const joker = jokerEl ? jokerEl.value : "";
+
+        const problems = [];
+        const need = (id, val, msg) => { if (!val) problems.push([id, msg]); };
+
+        need("champion", champion, "Pick a champion.");
+        need("runnerup", runnerup, "Pick a runner-up.");
+        need("third", third, "Pick a third place.");
+
+        // Distinct podium
+        const podium = [champion, runnerup, third].filter(Boolean);
+        if (podium.length === 3 && new Set(podium).size !== 3) {
+          ["champion", "runnerup", "third"].forEach((id) => problems.push([id, "Champion, runner-up and third must be three different teams."]));
+        }
+
+        need("boot", boot, "Pick a Golden Boot.");
+        if (boot === "Other (type a name)" && !bootOther) problems.push(["boot_other", "Type the player's name."]);
+        need("glove", glove, "Pick a Golden Glove.");
+        if (glove === "Other (type a name)" && !gloveOther) problems.push(["glove_other", "Type the keeper's name."]);
+
+        need("darkhorse", darkhorse, "Pick a dark horse.");
+        need("firstout", firstout, "Pick a favourite to crash out.");
+
+        if (totalRaw === "") {
+          problems.push(["totalgoals", "Enter a total-goals guess."]);
+        } else {
+          const n = Number(totalRaw);
+          if (!Number.isInteger(n) || n < 0 || n > 400) problems.push(["totalgoals", "Whole number between 0 and 400."]);
+        }
+
+        if (!joker) problems.push(["joker", "Tick one pick as your Joker."]);
+
+        if (problems.length) {
+          problems.forEach(([id, msg]) => {
+            const err = document.querySelector(`[data-err-for="${id}"]`);
+            if (err && !err.textContent) WC.setError(err, msg);
+          });
+          const firstId = problems[0][0];
+          WC.focusInvalid(document.getElementById(firstId) || form.querySelector(`[data-err-for="${firstId}"]`));
+          WC.setError(formErr, "A few picks need a look 👆");
+          return;
+        }
+
+        // Build payload (column names = the spec's contract).
+        const payload = {
+          form: "blind_bet",
+          player,
+          f1_champion: champion,
+          f1_runnerup: runnerup,
+          f1_third: third,
+          f1_boot: boot === "Other (type a name)" ? "Other" : boot,
+          f1_boot_other: boot === "Other (type a name)" ? bootOther : "",
+          f1_glove: glove === "Other (type a name)" ? "Other" : glove,
+          f1_glove_other: glove === "Other (type a name)" ? gloveOther : "",
+          f1_darkhorse: darkhorse,
+          f1_firstout: firstout,
+          f1_totalgoals: Number(totalRaw),
+          f1_joker: joker,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Locking in…";
+        const res = await window.submitPicks(payload);
+
+        if (!res.ok) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Lock in my bets 🔒";
+          WC.setError(formErr, "Couldn't reach the server — your picks are saved on this device. Try again on a better connection.");
+          return;
+        }
+
+        WC.showSuccess({
+          player,
+          round: "Round 1 · The Blind Bet",
+          mode: res.mode,
+          summaryHtml: WC.summaryTable([
+            ["🏆 Champion", payload.f1_champion],
+            ["🥈 Runner-up", payload.f1_runnerup],
+            ["🥉 Third", payload.f1_third],
+            ["⚽ Golden Boot", payload.f1_boot === "Other" ? payload.f1_boot_other : payload.f1_boot],
+            ["🧤 Golden Glove", payload.f1_glove === "Other" ? payload.f1_glove_other : payload.f1_glove],
+            ["🐴 Dark Horse", payload.f1_darkhorse],
+            ["💥 First out", payload.f1_firstout],
+            ["🔢 Total goals", payload.f1_totalgoals],
+            ["🃏 Joker", payload.f1_joker],
+          ]),
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

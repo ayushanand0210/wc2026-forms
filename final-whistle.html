@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Round 3 · Final Whistle — WC2026</title>
+  <meta name="theme-color" content="#03251c" />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🟣</text></svg>' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom:6px">
+      <a class="link" href="index.html" style="font-size:14px">← League</a>
+      <p class="eyebrow" style="margin-top:14px">Round 3 · The last call</p>
+      <h1 class="h1" style="font-size:30px">Final Whistle 🟣</h1>
+      <p class="lede" id="greeting" style="margin-top:8px"></p>
+    </header>
+
+    <form id="form" class="card" novalidate>
+      <div class="field">
+        <label for="winner">🏆 Winner of the final <span class="qhint">(8 pts)</span></label>
+        <select id="winner" class="input"></select>
+        <div class="err" data-err-for="winner"></div>
+      </div>
+
+      <div class="field">
+        <label>🔢 Exact final scoreline <span class="qhint">(+6 pts if spot on)</span></label>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
+          <div style="flex:1">
+            <div class="qhint" id="label_a" style="margin-bottom:6px"></div>
+            <input id="score_a" class="input" type="number" inputmode="numeric" min="0" max="15" step="1" placeholder="0" style="text-align:center" />
+          </div>
+          <div style="font-weight:800;color:var(--gold);padding-top:22px">–</div>
+          <div style="flex:1">
+            <div class="qhint" id="label_b" style="margin-bottom:6px"></div>
+            <input id="score_b" class="input" type="number" inputmode="numeric" min="0" max="15" step="1" placeholder="0" style="text-align:center" />
+          </div>
+        </div>
+        <div class="err" data-err-for="score"></div>
+      </div>
+
+      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Lock in the final 🔒</button>
+      <div class="err" id="form-err" style="text-align:center;margin-top:10px"></div>
+    </form>
+
+    <p class="foot">Round 3 of 3 · Final Whistle</p>
+  </div>
+
+  <script src="config/finalists.js"></script>
+  <script src="config/forms.js"></script>
+  <script src="config/endpoint.js"></script>
+  <script src="shared/submit.js"></script>
+  <script src="shared/form-helpers.js"></script>
+  <script>
+    (function () {
+      const meta = window.FORM_STATE.final_whistle;
+      const finalists = (window.FINALISTS || []).filter(Boolean);
+
+      // Gate: closed until the admin fills the 2 finalists.
+      if (!meta.open || finalists.length < 2) {
+        WC.showClosed({ round: meta.round, name: meta.name, status: meta.status, blurb: meta.blurb });
+        return;
+      }
+
+      const player = WC.requirePlayer();
+      if (!player) return;
+      const A = finalists[0], B = finalists[1];
+      document.getElementById("greeting").innerHTML =
+        `Hey <strong>${WC.escapeHtml(player)}</strong> — it's <strong>${WC.escapeHtml(A)}</strong> vs <strong>${WC.escapeHtml(B)}</strong>. Two taps.`;
+
+      WC.fillSelect(document.getElementById("winner"), finalists, "Who lifts the trophy?");
+      document.getElementById("label_a").textContent = A;
+      document.getElementById("label_b").textContent = B;
+
+      const form = document.getElementById("form");
+      const submitBtn = document.getElementById("submit");
+      const formErr = document.getElementById("form-err");
+
+      ["winner", "score_a", "score_b"].forEach((id) =>
+        document.getElementById(id).addEventListener("input", (e) => e.target.classList.remove("bad"))
+      );
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        WC.clearBad(form);
+        WC.setError(formErr, "");
+        document.querySelectorAll(".err[data-err-for]").forEach((n) => (n.textContent = ""));
+
+        const winner = document.getElementById("winner").value;
+        const aRaw = document.getElementById("score_a").value.trim();
+        const bRaw = document.getElementById("score_b").value.trim();
+
+        const problems = [];
+        if (!winner) problems.push(["winner", "Pick the winner."]);
+        const validScore = (s) => s !== "" && Number.isInteger(Number(s)) && Number(s) >= 0 && Number(s) <= 15;
+        if (!validScore(aRaw) || !validScore(bRaw)) problems.push(["score", "Enter both scores as whole numbers, 0–15."]);
+
+        if (problems.length) {
+          problems.forEach(([id, msg]) => WC.setError(document.querySelector(`[data-err-for="${id}"]`), msg));
+          WC.setError(formErr, "Almost — check the highlighted bits 👆");
+          if (!winner) document.getElementById("winner").classList.add("bad");
+          if (!validScore(aRaw)) document.getElementById("score_a").classList.add("bad");
+          if (!validScore(bRaw)) document.getElementById("score_b").classList.add("bad");
+          return;
+        }
+
+        const payload = {
+          form: "final_whistle",
+          player,
+          f3_winner: winner,
+          f3_score_a: Number(aRaw),
+          f3_score_b: Number(bRaw),
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Locking in…";
+        const res = await window.submitPicks(payload);
+        if (!res.ok) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Lock in the final 🔒";
+          WC.setError(formErr, "Couldn't reach the server — your picks are saved on this device. Try again on a better connection.");
+          return;
+        }
+
+        WC.showSuccess({
+          player,
+          round: "Round 3 · Final Whistle",
+          mode: res.mode,
+          summaryHtml: WC.summaryTable([
+            ["🏆 Winner", winner],
+            ["🔢 Score", `${A} ${aRaw} – ${bRaw} ${B}`],
+          ]),
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

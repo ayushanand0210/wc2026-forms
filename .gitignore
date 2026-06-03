@@ -1,0 +1,13 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+
+# Node (only if a host needs it later)
+node_modules/
+
+# NOTE: config/endpoint.js is intentionally NOT ignored.
+# The Apps Script Web App URL is a public POST endpoint (access = "Anyone"),
+# not a secret, and the static host needs the file at runtime. If you'd rather
+# keep it out of git, uncomment the next line and inject the URL at deploy time.
+# config/endpoint.js

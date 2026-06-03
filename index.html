@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>World Cup 2026 — Prediction League</title>
+  <meta name="theme-color" content="#03251c" />
+  <meta name="description" content="Six mates, one ₹3,000 pot. Place your World Cup 2026 prediction bets." />
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏆</text></svg>' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Hero -->
+    <header style="text-align:center;padding-top:12px">
+      <p class="eyebrow">🏆 Prediction League</p>
+      <h1 class="h1">World Cup<br />2026</h1>
+      <p class="lede" style="margin-top:12px">
+        Six of us. <span class="gold">₹500</span> each. One <span class="gold">₹3,000</span> pot.<br />
+        Pick with your gut — defend it in the group chat.
+      </p>
+      <div class="chips" style="justify-content:center;margin-top:16px">
+        <span class="chip">🥇 Winner ₹1,950</span>
+        <span class="chip">🥈 Runner-up ₹1,050</span>
+      </div>
+    </header>
+
+    <!-- Open-now banner -->
+    <div class="card" style="margin-top:22px;border-color:rgba(74,222,128,0.35);background:rgba(8,52,38,0.72)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="dot"></span>
+        <strong>Round 1 is open</strong>
+      </div>
+      <p class="lede" style="margin-top:8px">
+        <strong>The Blind Bet</strong> — your gut calls before a ball is kicked.
+        Champion, podium, Golden Boot, your dark horse. Takes under a minute.
+      </p>
+      <p class="gold" style="font-weight:700;font-size:14px;margin:10px 0 0">⏳ Closes June 10, 11:59 PM IST</p>
+    </div>
+
+    <!-- Name entry -->
+    <div class="card" style="margin-top:14px">
+      <h2 class="h2">Place your bets</h2>
+      <p class="lede" style="margin-bottom:14px">Pop your name in and you're off.</p>
+      <div id="name-field">
+        <input id="name" class="input" type="text" inputmode="text" autocomplete="name"
+               placeholder="Your name" aria-label="Your name" />
+      </div>
+      <div class="err" id="name-err"></div>
+      <button class="btn btn-gold" id="enter" style="margin-top:12px">Enter &nbsp;→</button>
+      <p class="muted" style="font-size:12px;text-align:center;margin:12px 0 0">Use the same name every round so your points add up.</p>
+    </div>
+
+    <!-- How it works -->
+    <div class="card" style="margin-top:14px">
+      <h2 class="h2" style="margin-bottom:6px">How it works</h2>
+      <p class="lede" style="margin-bottom:6px">Predictions happen across three rounds. Each opens when the tournament reaches it — you just fill a quick form when it does.</p>
+      <div class="round">
+        <div class="no">1</div>
+        <div>
+          <strong>The Blind Bet</strong> <span class="chip live" style="padding:3px 9px;font-size:11px;margin-left:4px"><span class="dot" style="width:6px;height:6px"></span> open</span>
+          <p class="qhint" style="margin:4px 0 0">Call the champion, the podium, Golden Boot &amp; Glove, a dark horse, and the first favourite to crash out. <span class="muted">Closes June 10.</span></p>
+        </div>
+      </div>
+      <div class="round">
+        <div class="no">2</div>
+        <div>
+          <strong>The Comeback</strong>
+          <p class="qhint" style="margin:4px 0 0">Group stage done, 32 teams left. Pick your 4 semi-finalists — your second chance to climb. <span class="muted">Opens ~June 27.</span></p>
+        </div>
+      </div>
+      <div class="round">
+        <div class="no">3</div>
+        <div>
+          <strong>Final Whistle</strong>
+          <p class="qhint" style="margin:4px 0 0">Two teams left. Call the winner and the exact score. <span class="muted">Opens July 18.</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick rules -->
+    <div class="card" style="margin-top:14px">
+      <h2 class="h2" style="margin-bottom:10px">Good to know</h2>
+      <div class="round" style="padding-top:0;border:0">
+        <div class="no" style="background:rgba(251,191,36,0.14)">🎯</div>
+        <div><strong>Partial credit.</strong><p class="qhint" style="margin:3px 0 0">Right team, wrong podium spot? You still score something.</p></div>
+      </div>
+      <div class="round">
+        <div class="no">🃏</div>
+        <div><strong>The Joker.</strong><p class="qhint" style="margin:3px 0 0">In Rounds 1 &amp; 2, double down on one pick. Hits = points doubled. Misses = no penalty. Pure upside.</p></div>
+      </div>
+      <div class="round">
+        <div class="no">⚖️</div>
+        <div><strong>Tiebreaker.</strong><p class="qhint" style="margin:3px 0 0">Level on points? Closest total-goals guess from Round 1 wins.</p></div>
+      </div>
+
+      <details class="acc" style="margin-top:6px">
+        <summary>Full scoring breakdown</summary>
+        <table class="scoretable">
+          <tr><td>🏆 Champion (exact)</td><td>25</td></tr>
+          <tr><td>🏆 Champion finishes 2nd/3rd</td><td>8</td></tr>
+          <tr><td>🥈 Runner-up (exact)</td><td>12</td></tr>
+          <tr><td>🥉 Third place (exact)</td><td>8</td></tr>
+          <tr><td>⚽ Golden Boot</td><td>10</td></tr>
+          <tr><td>🧤 Golden Glove</td><td>6</td></tr>
+          <tr><td>🐴 Dark Horse reaches QF</td><td>8</td></tr>
+          <tr><td>💥 First favourite to crash out</td><td>6</td></tr>
+          <tr><td>Each correct semi-finalist</td><td>6 (max 24)</td></tr>
+          <tr><td>Semi-finalist who reaches final</td><td>+5 (max 10)</td></tr>
+          <tr><td>Final winner</td><td>8</td></tr>
+          <tr><td>Exact final scoreline</td><td>+6</td></tr>
+        </table>
+        <p class="qhint" style="margin-top:8px">Max ≈ 123 points across the tournament. Nobody gets close.</p>
+      </details>
+    </div>
+
+    <p class="foot">A leaderboard drops after every knockout round.<br />May the best gut win. ⚽</p>
+  </div>
+
+  <script src="config/forms.js"></script>
+  <script src="config/players.js"></script>
+  <script src="shared/form-helpers.js"></script>
+  <script>
+    (function () {
+      const nameInput = document.getElementById("name");
+      const nameField = document.getElementById("name-field");
+      const errEl = document.getElementById("name-err");
+      const btn = document.getElementById("enter");
+
+      // Prefill from a previous round on this device.
+      const remembered = (localStorage.getItem("wc2026_player") || "").trim();
+
+      // Optional: if a fixed 6-name roster is configured, swap the text box for a dropdown.
+      const roster = (window.PLAYERS || []).filter(Boolean);
+      let getValue = () => nameInput.value.trim();
+      if (roster.length) {
+        const sel = document.createElement("select");
+        sel.className = "input";
+        sel.id = "name";
+        WC.fillSelect(sel, roster, "Pick your name…");
+        nameField.innerHTML = "";
+        nameField.appendChild(sel);
+        if (remembered && roster.includes(remembered)) sel.value = remembered;
+        getValue = () => sel.value.trim();
+        sel.addEventListener("change", () => WC.setError(errEl, ""));
+      } else if (remembered) {
+        nameInput.value = remembered;
+      }
+
+      // Which form is open right now?
+      const open = Object.values(window.FORM_STATE).find((f) => f.open) || window.FORM_STATE.blind_bet;
+
+      function go() {
+        const name = getValue();
+        if (!name) {
+          WC.setError(errEl, "Pop your name in first 🙂");
+          const ctrl = document.getElementById("name");
+          ctrl && ctrl.classList.add("bad");
+          return;
+        }
+        WC.setError(errEl, "");
+        localStorage.setItem("wc2026_player", name);
+        location.href = open.page + "?name=" + encodeURIComponent(name);
+      }
+
+      btn.addEventListener("click", go);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && document.activeElement && document.activeElement.id === "name") go();
+      });
+      const ctrl = document.getElementById("name");
+      ctrl && ctrl.addEventListener("input", () => { WC.setError(errEl, ""); ctrl.classList.remove("bad"); });
+    })();
+  </script>
+</body>
+</html>
