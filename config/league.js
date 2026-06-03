@@ -7,6 +7,10 @@
 //
 // Math, for any N: pot = entryFee × N; winner = 65% of pot; runner-up = the rest.
 // With entryFee 500 every payout is a whole rupee (winner = 325·N, runner-up = 175·N).
+//
+// Preview tip: append ?players=8 (or ?n=8) to the landing-page URL to see any
+// count's pot/prizes instantly — no edit or deploy needed. It's display-only and
+// resets on a normal visit. To make a count permanent, change `playerCount` here.
 window.LEAGUE = {
   currency: "₹",
   entryFee: 500,

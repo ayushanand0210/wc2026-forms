@@ -88,7 +88,13 @@ function escapeHtml(s) {
 function leagueMoney() {
   const L = window.LEAGUE || {};
   const roster = (window.PLAYERS || []).filter(Boolean);
-  const n = roster.length || L.playerCount || 6;
+  let n = roster.length || L.playerCount || 6;
+  // Preview aid: ?players=N (or ?n=N) overrides the count so you can eyeball any
+  // pot/prize live without editing config. Display-only; resets on a normal visit.
+  try {
+    const o = parseInt(new URLSearchParams(location.search).get("players") || new URLSearchParams(location.search).get("n"), 10);
+    if (Number.isInteger(o) && o > 0 && o <= 50) n = o;
+  } catch (e) { /* no URL context */ }
   const fee = L.entryFee != null ? L.entryFee : 500;
   const winnerPct = (L.split && L.split.winner != null) ? L.split.winner : 0.65;
   const pot = fee * n;
