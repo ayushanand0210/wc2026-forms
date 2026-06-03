@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>World Cup 2026 — Prediction League</title>
   <meta name="theme-color" content="#03251c" />
-  <meta name="description" content="Six mates, one ₹3,000 pot. Place your World Cup 2026 prediction bets." />
+  <meta name="description" content="Place your World Cup 2026 prediction-league bets. Pick with your gut." />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏆</text></svg>' />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,12 +20,12 @@
       <p class="eyebrow">🏆 Prediction League</p>
       <h1 class="h1">World Cup<br />2026</h1>
       <p class="lede" style="margin-top:12px">
-        Six of us. <span class="gold">₹500</span> each. One <span class="gold">₹3,000</span> pot.<br />
+        <span id="m-count">Six</span> of us. <span class="gold" id="m-fee">₹500</span> each. One <span class="gold" id="m-pot">₹3,000</span> pot.<br />
         Pick with your gut — defend it in the group chat.
       </p>
       <div class="chips" style="justify-content:center;margin-top:16px">
-        <span class="chip">🥇 Winner ₹1,950</span>
-        <span class="chip">🥈 Runner-up ₹1,050</span>
+        <span class="chip">🥇 Winner <span id="m-winner">₹1,950</span></span>
+        <span class="chip">🥈 Runner-up <span id="m-runner">₹1,050</span></span>
       </div>
     </header>
 
@@ -123,9 +123,18 @@
 
   <script src="config/forms.js"></script>
   <script src="config/players.js"></script>
+  <script src="config/league.js"></script>
   <script src="shared/form-helpers.js"></script>
   <script>
     (function () {
+      // Pot + prizes derive from config/league.js (count = roster length or playerCount).
+      const M = WC.leagueMoney();
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set("m-count", WC.countWord(M.n));
+      set("m-fee", M.fmt(M.fee));
+      set("m-pot", M.fmt(M.pot));
+      set("m-winner", M.fmt(M.winner));
+      set("m-runner", M.fmt(M.runnerUp));
       const nameInput = document.getElementById("name");
       const nameField = document.getElementById("name-field");
       const errEl = document.getElementById("name-err");

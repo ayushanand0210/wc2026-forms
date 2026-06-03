@@ -83,6 +83,28 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// --- League money (derived from config/league.js + players.js) -------------
+// Count comes from the roster if names are listed, else LEAGUE.playerCount.
+function leagueMoney() {
+  const L = window.LEAGUE || {};
+  const roster = (window.PLAYERS || []).filter(Boolean);
+  const n = roster.length || L.playerCount || 6;
+  const fee = L.entryFee != null ? L.entryFee : 500;
+  const winnerPct = (L.split && L.split.winner != null) ? L.split.winner : 0.65;
+  const pot = fee * n;
+  const winner = Math.round(pot * winnerPct);
+  const runnerUp = pot - winner; // exact remainder, always sums to the pot
+  const cur = L.currency || "₹";
+  const fmt = (x) => cur + Number(x).toLocaleString("en-IN");
+  return { n, fee, pot, winner, runnerUp, currency: cur, fmt };
+}
+
+// Spell small counts; fall back to the digit for anything outside the map.
+function countWord(n) {
+  const words = ["zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+  return words[n] || String(n);
+}
+
 // Build a "you picked" summary table from [label, value] pairs.
 function summaryTable(rows) {
   const body = rows
@@ -107,4 +129,4 @@ function showClosed({ round, name, status, blurb }) {
     </div>`;
 }
 
-window.WC = { getPlayerName, requirePlayer, $, fillSelect, setError, focusInvalid, clearBad, showSuccess, showClosed, summaryTable, escapeHtml };
+window.WC = { getPlayerName, requirePlayer, $, fillSelect, setError, focusInvalid, clearBad, showSuccess, showClosed, summaryTable, escapeHtml, leagueMoney, countWord };
