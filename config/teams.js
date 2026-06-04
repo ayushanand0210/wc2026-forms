@@ -12,12 +12,21 @@ window.TEAMS = [
   "United States", "Uruguay", "Uzbekistan",
 ];
 
-// The Favourites-8 — Appendix B (FIFA ranking). Re-pin from the June 9, 2026
-// ranking before opening Form 1 if the top 8 reshuffles.
+// The Favourites-8 (top 8 by FIFA ranking). Used for the "First favourite to be
+// knocked out" pick. Re-pin from the June 9, 2026 ranking if the top 8 reshuffles.
 window.FAVOURITES8 = [
   "France", "Spain", "Argentina", "England",
   "Portugal", "Brazil", "Netherlands", "Morocco",
 ];
 
-// Derived: the other 40 teams (Dark Horse dropdown).
-window.NON_FAVOURITES = window.TEAMS.filter((t) => !window.FAVOURITES8.includes(t));
+// The Top-16 (by FIFA ranking) — these are EXCLUDED from the Dark Horse pool, so a
+// dark horse must be a genuine outsider (ranked outside the top 16). This is the
+// Favourites-8 plus the next 8 highest-ranked qualified teams. Edit the second row
+// if you'd rank teams 9–16 differently; re-pin before opening Phase 1.
+window.TOP16 = window.FAVOURITES8.concat([
+  "Belgium", "Germany", "Croatia", "Colombia",
+  "Uruguay", "United States", "Mexico", "Japan",
+]);
+
+// Derived: the 32 teams a Dark Horse can be picked from (everyone outside the top 16).
+window.DARK_HORSE_POOL = window.TEAMS.filter((t) => window.TOP16.indexOf(t) === -1);

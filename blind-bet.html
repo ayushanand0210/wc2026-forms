@@ -59,7 +59,7 @@
       </div>
 
       <div class="field">
-        <label for="darkhorse">🐴 Dark Horse <span class="qhint">(non-favourite who reaches the QF)</span></label>
+        <label for="darkhorse">🐴 Dark Horse <span class="qhint">(an outsider — outside the top 16 — who reaches the QF)</span></label>
         <select id="darkhorse" class="input" data-q></select>
         <div class="err" data-err-for="darkhorse"></div>
       </div>
@@ -103,7 +103,7 @@
       document.getElementById("greeting").innerHTML =
         `<strong>${WC.escapeHtml(player)}</strong> — make your picks below.`;
 
-      const TEAMS = window.TEAMS, FAVS = window.FAVOURITES8, NONFAV = window.NON_FAVOURITES;
+      const TEAMS = window.TEAMS, FAVS = window.FAVOURITES8, DARKPOOL = window.DARK_HORSE_POOL;
 
       // Podium dropdowns
       WC.fillSelect(document.getElementById("champion"), TEAMS, "Pick the winner…");
@@ -114,8 +114,8 @@
       WC.fillSelect(document.getElementById("boot"), [...window.STRIKERS, "Other (type a name)"], "Pick the top scorer…");
       WC.fillSelect(document.getElementById("glove"), [...window.KEEPERS, "Other (type a name)"], "Pick the best keeper…");
 
-      // Dark Horse = 40 non-favourites; First Out = the 8 favourites
-      WC.fillSelect(document.getElementById("darkhorse"), NONFAV, "Pick a non-favourite…");
+      // Dark Horse = the 32 teams outside the top 16; First Out = the 8 favourites
+      WC.fillSelect(document.getElementById("darkhorse"), DARKPOOL, "Pick an outsider…");
       WC.fillSelect(document.getElementById("firstout"), FAVS, "Pick a favourite…");
 
       // Joker pills
