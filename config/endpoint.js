@@ -6,4 +6,4 @@
 // is appended as a row to your Google Sheet.
 //
 // Example: window.SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfy.../exec";
-window.SUBMIT_ENDPOINT = "";
+window.SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzmYjyEdbxr4xyn2F3zmAT4glmJIrsdnLx0WdOHXvM4kjdZlOmJdcGfUf-spSkQRUfyyQ/exec";
