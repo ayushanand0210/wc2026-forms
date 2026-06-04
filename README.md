@@ -55,11 +55,20 @@ Without a Sheet endpoint configured, submissions save to the browser only (a
    window.SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfy.../exec";
    ```
 
-That's it — submissions now append to your Sheet (one tab per form, created
-automatically: `blind_bet`, `comeback`, `final_whistle`).
+5. In the Apps Script editor, pick the **`setup`** function from the toolbar dropdown
+   and click **▶ Run** once. This builds three phase tabs — **Bet (Phase 1/2/3)** —
+   and removes the default `Sheet1`.
+
+That's it — submissions now land in a **column-per-player** layout: pick labels down
+column A (frozen), player names across row 1, one column per person. Re-submitting
+updates that person's column in place (no duplicate columns). Each phase is its own tab.
 
 > Updating the script later? **Deploy → Manage deployments → edit (✏️) → New version.**
-> Reusing the same deployment keeps the URL stable.
+> Reusing the same deployment keeps the URL stable. Re-run `setup` if you change the layout.
+
+> **Note:** this column layout is a human-readable view (friends scan it by name) and
+> deviates from the original row-per-submission spec on purpose. If you later build an
+> automated scorer, transposing back to rows is trivial.
 
 ---
 

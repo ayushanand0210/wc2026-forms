@@ -1,63 +1,93 @@
 /**
- * WC2026 Prediction Forms — Google Apps Script backend.
+ * WC2026 Prediction Forms — Google Apps Script backend (column-per-player layout).
  *
- * Receives one submission (JSON) per POST and appends it as a row to the matching
- * tab of the bound Google Sheet. Column order is the contract from CLAUDE.md — do
- * not rename. Tabs and header rows are created automatically on first use.
+ * Each phase is its own tab. Inside a tab:
+ *   • Column A = the pick labels (Champion, Runner-up, …)  [frozen]
+ *   • Row 1    = player names across the top                [frozen]
+ *   • Each player gets ONE column; re-submitting updates that same column in place.
  *
- * SETUP (5 min):
- *   1. Create a new Google Sheet.
- *   2. Extensions → Apps Script. Delete the sample, paste this whole file, Save.
- *   3. Deploy → New deployment → type "Web app".
- *        - Execute as: Me
- *        - Who has access: Anyone
- *      Deploy, authorise, and COPY the Web app URL (ends in /exec).
- *   4. Paste that URL into config/endpoint.js in the site.
- *   To update the script later: Deploy → Manage deployments → edit → New version.
+ * This is a human-readable view (friends can scan name-by-name). It deviates from
+ * the original row-per-submission spec on purpose — for a friends-facing sheet.
+ *
+ * ── First-time setup ───────────────────────────────────────────────────────────
+ *   1. Paste this whole file over the old Code.gs, then Save (💾).
+ *   2. In the toolbar, pick the function `setup` from the dropdown and click ▶ Run.
+ *      (Authorize again if asked.) This creates the three phase tabs and removes
+ *      the default "Sheet1" + any old row-format tabs.
+ *   3. Deploy → Manage deployments → ✏️ edit → Version: New version → Deploy.
+ *      (Keeps the same /exec URL, so the website needs no change.)
+ *   4. Submit once on the live form to see your column appear.
  */
 
-var TABS = {
-  blind_bet: [
-    "submitted_at", "player", "f1_champion", "f1_runnerup", "f1_third",
-    "f1_boot", "f1_boot_other", "f1_glove", "f1_glove_other",
-    "f1_darkhorse", "f1_firstout", "f1_totalgoals", "f1_joker",
-  ],
-  comeback: [
-    "submitted_at", "player", "f2_semis", "f2_boot_swap", "f2_boot_swap_other", "f2_joker",
-  ],
-  final_whistle: [
-    "submitted_at", "player", "f3_winner", "f3_score_a", "f3_score_b",
-  ],
+var LAYOUTS = {
+  blind_bet: {
+    tab: "Bet (Phase 1)",
+    rows: [
+      { label: "Submitted", key: "submitted_at" },
+      { label: "🏆 Champion", key: "f1_champion" },
+      { label: "🥈 Runner-up", key: "f1_runnerup" },
+      { label: "🥉 Third place", key: "f1_third" },
+      { label: "⚽ Golden Boot", key: "f1_boot", other: "f1_boot_other" },
+      { label: "🧤 Golden Glove", key: "f1_glove", other: "f1_glove_other" },
+      { label: "🐴 Dark Horse", key: "f1_darkhorse" },
+      { label: "💥 First favourite out", key: "f1_firstout" },
+      { label: "🔢 Total goals", key: "f1_totalgoals" },
+      { label: "🃏 Joker", key: "f1_joker" },
+    ],
+  },
+  comeback: {
+    tab: "Bet (Phase 2)",
+    rows: [
+      { label: "Submitted", key: "submitted_at" },
+      { label: "Semi-finalists", key: "f2_semis" },
+      { label: "⚽ Golden Boot swap", key: "f2_boot_swap", other: "f2_boot_swap_other" },
+      { label: "🃏 Joker", key: "f2_joker" },
+    ],
+  },
+  final_whistle: {
+    tab: "Bet (Phase 3)",
+    rows: [
+      { label: "Submitted", key: "submitted_at" },
+      { label: "🏆 Final winner", key: "f3_winner" },
+      { label: "🔢 Predicted score", key: "__score" },
+    ],
+  },
 };
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
-  lock.waitLock(20000); // serialise appends so concurrent submits don't collide
+  lock.waitLock(20000); // serialise writes so concurrent submits don't collide
   try {
     var data = JSON.parse(e.postData.contents);
-    var form = data.form;
-    var cols = TABS[form];
-    if (!cols) throw new Error("Unknown form: " + form);
+    var layout = LAYOUTS[data.form];
+    if (!layout) throw new Error("Unknown form: " + data.form);
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(form);
-    if (!sheet) {
-      sheet = ss.insertSheet(form);
-    }
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(cols);
-    }
+    var sheet = ss.getSheetByName(layout.tab) || ss.insertSheet(layout.tab);
+    ensureLabels_(sheet, layout);
 
-    var now = new Date().toISOString();
-    var row = cols.map(function (c) {
-      if (c === "submitted_at") return now;
-      return data[c] !== undefined && data[c] !== null ? data[c] : "";
-    });
-    sheet.appendRow(row);
+    // Build this player's column of values, aligned to the label rows.
+    var tz = Session.getScriptTimeZone();
+    var stamp = Utilities.formatDate(new Date(), tz, "dd MMM, HH:mm");
+    var values = layout.rows.map(function (r) { return [displayValue_(r, data, stamp)]; });
 
-    return json({ ok: true });
+    // Find the player's existing column (row 1), or use the next free column.
+    var player = String(data.player || "(no name)").trim();
+    var lastCol = Math.max(1, sheet.getLastColumn());
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    var targetCol = -1;
+    for (var c = 1; c < headers.length; c++) { // skip column A (labels)
+      if (String(headers[c]).trim() === player) { targetCol = c + 1; break; }
+    }
+    if (targetCol === -1) targetCol = Math.max(2, lastCol + 1);
+
+    sheet.getRange(1, targetCol).setValue(player).setFontWeight("bold");
+    sheet.getRange(2, targetCol, values.length, 1).setValues(values);
+    sheet.setColumnWidth(targetCol, 160);
+
+    return json_({ ok: true });
   } catch (err) {
-    return json({ ok: false, error: String(err) });
+    return json_({ ok: false, error: String(err) });
   } finally {
     lock.releaseLock();
   }
@@ -67,8 +97,42 @@ function doGet() {
   return ContentService.createTextOutput("WC2026 forms endpoint is live.");
 }
 
-function json(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+/** Run this once from the editor to (re)build tabs and clean up old ones. */
+function setup() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Create / refresh the three phase tabs with their label columns.
+  Object.keys(LAYOUTS).forEach(function (k) {
+    var layout = LAYOUTS[k];
+    var sheet = ss.getSheetByName(layout.tab) || ss.insertSheet(layout.tab);
+    ensureLabels_(sheet, layout);
+  });
+  // Remove the default sheet and any leftover row-format tabs (test data only).
+  ["Sheet1", "Sheet 1", "blind_bet", "comeback", "final_whistle"].forEach(function (name) {
+    var s = ss.getSheetByName(name);
+    if (s && ss.getSheets().length > 1) ss.deleteSheet(s);
+  });
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function ensureLabels_(sheet, layout) {
+  sheet.getRange(1, 1).setValue("Pick \\ Player").setFontWeight("bold").setBackground("#f1f3f4");
+  var labels = layout.rows.map(function (r) { return [r.label]; });
+  sheet.getRange(2, 1, labels.length, 1).setValues(labels).setFontWeight("bold");
+  sheet.setColumnWidth(1, 190);
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(1);
+}
+
+function displayValue_(r, data, stamp) {
+  if (r.key === "submitted_at") return stamp;
+  if (r.key === "__score") return val_(data.f3_score_a) + " – " + val_(data.f3_score_b);
+  if (r.other && String(data[r.key]) === "Other") return val_(data[r.other]);
+  return val_(data[r.key]);
+}
+
+function val_(x) { return (x === undefined || x === null) ? "" : x; }
+
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
