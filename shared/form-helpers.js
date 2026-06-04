@@ -68,13 +68,12 @@ function showSuccess({ player, round, summaryHtml, mode }) {
     <div class="wrap">
       <div class="card success">
         <div class="tick">✅</div>
-        <h1 class="h1" style="font-size:26px;margin-top:10px">Locked in, ${escapeHtml(player)}!</h1>
-        <p class="lede" style="margin-top:6px">${escapeHtml(round)} — your bet is placed.</p>
+        <h1 class="h1" style="font-size:26px;margin-top:10px">Submitted, ${escapeHtml(player)}</h1>
+        <p class="lede" style="margin-top:6px">${escapeHtml(round)} — your picks are saved.</p>
         ${summaryHtml ? `<div style="text-align:left;margin-top:18px">${summaryHtml}</div>` : ""}
         ${note}
-        <a class="btn btn-ghost" style="margin-top:18px;text-decoration:none" href="index.html">← Back to the league</a>
+        <a class="btn btn-ghost" style="margin-top:18px;text-decoration:none" href="index.html">← Back</a>
       </div>
-      <p class="foot">May the best gut win. ⚽</p>
     </div>`;
   window.scrollTo(0, 0);
 }
@@ -122,7 +121,7 @@ function showClosed({ round, name, status, blurb }) {
         <h1 class="h1" style="font-size:26px">${escapeHtml(name)}</h1>
         <p class="lede" style="margin-top:8px">${escapeHtml(blurb || "")}</p>
         <div class="chips" style="justify-content:center;margin-top:16px"><span class="chip">${escapeHtml(status)}</span></div>
-        <a class="btn btn-ghost" style="margin-top:20px;text-decoration:none" href="index.html">← Back to the league</a>
+        <a class="btn btn-ghost" style="margin-top:20px;text-decoration:none" href="index.html">← Back</a>
       </div>
     </div>`;
 }

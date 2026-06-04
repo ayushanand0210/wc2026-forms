@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Round 3 · Final Whistle — WC2026</title>
+  <title>Phase 3 — WMC Prediction League</title>
   <meta name="theme-color" content="#03251c" />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🟣</text></svg>' />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,9 +14,9 @@
 <body>
   <div class="wrap">
     <header style="margin-bottom:6px">
-      <a class="link" href="index.html" style="font-size:14px">← League</a>
-      <p class="eyebrow" style="margin-top:14px">Round 3 · The last call</p>
-      <h1 class="h1" style="font-size:30px">Final Whistle 🟣</h1>
+      <a class="link" href="index.html" style="font-size:14px">← Back</a>
+      <p class="eyebrow" style="margin-top:14px">WMC Prediction League · Phase 3</p>
+      <h1 class="h1" style="font-size:30px">Phase 3</h1>
       <p class="lede" id="greeting" style="margin-top:8px"></p>
     </header>
 
@@ -43,11 +43,11 @@
         <div class="err" data-err-for="score"></div>
       </div>
 
-      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Lock in the final 🔒</button>
+      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Submit</button>
       <div class="err" id="form-err" style="text-align:center;margin-top:10px"></div>
     </form>
 
-    <p class="foot">Round 3 of 3 · Final Whistle</p>
+    <p class="foot">Phase 3 of 3</p>
   </div>
 
   <script src="config/finalists.js"></script>
@@ -70,7 +70,7 @@
       if (!player) return;
       const A = finalists[0], B = finalists[1];
       document.getElementById("greeting").innerHTML =
-        `Hey <strong>${WC.escapeHtml(player)}</strong> — it's <strong>${WC.escapeHtml(A)}</strong> vs <strong>${WC.escapeHtml(B)}</strong>. Two taps.`;
+        `<strong>${WC.escapeHtml(player)}</strong> — ${WC.escapeHtml(A)} vs ${WC.escapeHtml(B)}. Pick the winner and the exact score.`;
 
       WC.fillSelect(document.getElementById("winner"), finalists, "Who lifts the trophy?");
       document.getElementById("label_a").textContent = A;
@@ -121,14 +121,14 @@
         const res = await window.submitPicks(payload);
         if (!res.ok) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Lock in the final 🔒";
+          submitBtn.textContent = "Submit";
           WC.setError(formErr, "Couldn't reach the server — your picks are saved on this device. Try again on a better connection.");
           return;
         }
 
         WC.showSuccess({
           player,
-          round: "Round 3 · Final Whistle",
+          round: "Phase 3",
           mode: res.mode,
           summaryHtml: WC.summaryTable([
             ["🏆 Winner", winner],

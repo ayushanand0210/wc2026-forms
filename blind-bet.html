@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Round 1 · The Blind Bet — WC2026</title>
+  <title>Phase 1 — WMC Prediction League</title>
   <meta name="theme-color" content="#03251c" />
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔵</text></svg>' />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,9 +14,9 @@
 <body>
   <div class="wrap">
     <header style="margin-bottom:6px">
-      <a class="link" href="index.html" style="font-size:14px">← League</a>
-      <p class="eyebrow" style="margin-top:14px">Round 1 · Closes June 10</p>
-      <h1 class="h1" style="font-size:30px">The Blind Bet 🔵</h1>
+      <a class="link" href="index.html" style="font-size:14px">← Back</a>
+      <p class="eyebrow" style="margin-top:14px">WMC Prediction League · Closes June 10</p>
+      <h1 class="h1" style="font-size:30px">Phase 1</h1>
       <p class="lede" id="greeting" style="margin-top:8px"></p>
     </header>
 
@@ -82,12 +82,12 @@
         <div class="err" data-err-for="joker"></div>
       </div>
 
-      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Lock in my bets 🔒</button>
+      <button class="btn btn-gold" type="submit" id="submit" style="margin-top:24px">Submit</button>
       <div class="err" id="form-err" style="text-align:center;margin-top:10px"></div>
       <p class="muted" style="font-size:12px;text-align:center;margin-top:10px">You can re-submit before June 10 — the latest entry counts.</p>
     </form>
 
-    <p class="foot">Round 1 of 3 · The Blind Bet</p>
+    <p class="foot">Phase 1 of 3</p>
   </div>
 
   <script src="config/teams.js"></script>
@@ -101,7 +101,7 @@
       const player = WC.requirePlayer();
       if (!player) return;
       document.getElementById("greeting").innerHTML =
-        `Hey <strong>${WC.escapeHtml(player)}</strong> — gut calls only. No data, just instinct.`;
+        `<strong>${WC.escapeHtml(player)}</strong> — make your picks below.`;
 
       const TEAMS = window.TEAMS, FAVS = window.FAVOURITES8, NONFAV = window.NON_FAVOURITES;
 
@@ -234,14 +234,14 @@
 
         if (!res.ok) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Lock in my bets 🔒";
+          submitBtn.textContent = "Submit";
           WC.setError(formErr, "Couldn't reach the server — your picks are saved on this device. Try again on a better connection.");
           return;
         }
 
         WC.showSuccess({
           player,
-          round: "Round 1 · The Blind Bet",
+          round: "Phase 1",
           mode: res.mode,
           summaryHtml: WC.summaryTable([
             ["🏆 Champion", payload.f1_champion],

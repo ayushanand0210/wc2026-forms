@@ -1,4 +1,4 @@
-// DYNAMIC — Form 2 (The Comeback). Fill this with the 32 teams that survive the
+// DYNAMIC — Phase 2. Fill this with the 32 teams that survive the
 // group stage, right before opening the Comeback form (~June 27). While it stays
 // empty, the Comeback form shows a "not open yet" screen.
 //

@@ -1,38 +1,38 @@
 // Which form is currently open. The admin flips `open` to true/false to control
 // the live link. The landing page reads this to decide where "Enter" sends people
-// and to show each round's status.
+// and each form page reads its own status for the "not open yet" screen.
 //
 // Forms 2 & 3 also gate on their dynamic data (survivors.js / finalists.js) — even
 // if `open` is true, they stay closed until those lists are filled.
 window.FORM_STATE = {
   blind_bet: {
     key: "blind_bet",
-    round: "Round 1",
-    name: "The Blind Bet",
+    round: "WMC Prediction League",
+    name: "Phase 1",
     page: "blind-bet.html",
     open: true,
     status: "Open now",
     closes: "Closes June 10, 11:59 PM IST",
-    blurb: "Gut calls before a ball is kicked.",
+    blurb: "Pick the champion, podium, Golden Boot, Golden Glove, a dark horse, the first favourite out, and total goals.",
   },
   comeback: {
     key: "comeback",
-    round: "Round 2",
-    name: "The Comeback",
+    round: "WMC Prediction League",
+    name: "Phase 2",
     page: "comeback.html",
     open: false,
     status: "Opens ~June 27",
     closes: "Closes before the Round of 32",
-    blurb: "Group stage done, 32 teams left — your second chance.",
+    blurb: "After the group stage, pick your 4 semi-finalists.",
   },
   final_whistle: {
     key: "final_whistle",
-    round: "Round 3",
-    name: "Final Whistle",
+    round: "WMC Prediction League",
+    name: "Phase 3",
     page: "final-whistle.html",
     open: false,
     status: "Opens July 18",
-    closes: "Closes before the final kicks off",
-    blurb: "Two teams left. All drama.",
+    closes: "Closes before the final",
+    blurb: "Before the final, pick the winner and the exact score.",
   },
 };
